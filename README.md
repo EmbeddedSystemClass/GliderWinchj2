@@ -10,3 +10,4 @@ See GliderWinchj1 docs for a .txt with the message format.
 GliderWinch contains details relevant to the gateway.
 
 
+
