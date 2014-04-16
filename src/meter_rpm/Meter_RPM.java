@@ -47,8 +47,8 @@ public class Meter_RPM {
           Canmsg2 can1; 
             can1 = new Canmsg2();    // Received CAN message
             int ret;
-            final int[] eng;
-            eng = new int[4];
+            int[] eng;
+            eng = new int[2];
    // ======== Endless loop ====================================================
             while (true) {
               String msg = in.readLine();         // Get a line from socket
@@ -59,18 +59,17 @@ public class Meter_RPM {
                     continue;
                     }
            if (can1.id == 0x40800000){ /* Is this CAN ID an engine sensor message? */
-            can1.in_2int();     // Convert payload to two ints
-            eng[0] = can1.p0;   // Manifold pressure (not scaled)
-            eng[1] = can1.p1;   // RPM (not scaled)
+            eng = can1.get_2int();   // Convert payload to two ints
+            // eng[0]  Manifold pressure (not scaled)
+            // eng[1]  RPM (not scaled)
             
             /* Scale readings for display purposes. */
-            final double scaled0 = can1.p1 * .1; // RPM
-            final double scaled1 = ((double)(can1.p0) / 103.88) - 0.1; // Inches of mercury
+            final double scaled0 = eng[1] * .1; // RPM
+            final double scaled1 = ((double)(eng[0]) / 103.88) - 0.1; // Inches of mercury
           
-            SwingUtilities.invokeLater(new Runnable() 
-            {
-             @Override
-            public void run(){
+            SwingUtilities.invokeLater(new Runnable() {
+                @Override
+                public void run(){
              
 //if (SwingUtilities.isEventDispatchThread())
 //{
@@ -80,14 +79,11 @@ public class Meter_RPM {
 //{
 //  System.err.println("Is not running on EDT");
 //}   
-                so.setValue(scaled0, scaled1);
+                    so.setValue(scaled0, scaled1);
           
                 }
-            });            
-            
-                
-                }               
+            });                       
+           }               
         }
-    }
-    
+    }   
 }
