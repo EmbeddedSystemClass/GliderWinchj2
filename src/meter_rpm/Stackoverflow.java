@@ -86,7 +86,7 @@ public class Stackoverflow {
     
     
     DialTextAnnotation dialtextannotation = new DialTextAnnotation("RPM");
-                        dialtextannotation.setFont(new Font("Dialog", 1, 16));
+                        dialtextannotation.setFont(new Font("Dialog", 1, 12));
                         dialtextannotation.setRadius(0.69999999999999996D);
                         plot.addLayer(dialtextannotation);
     
@@ -108,7 +108,7 @@ public class Stackoverflow {
     // needle uses constrained data set
     plot.addLayer(new DialPointer.Pointer(0));
 
-    StandardDialScale scale = new StandardDialScale(0d, 6000, -110, -320, majorTickGap, 9);
+    StandardDialScale scale = new StandardDialScale(0d, 6000, -110, -320, majorTickGap, 4);
         scale.setTickRadius(0.88);
         scale.setTickLabelOffset(0.20);
         scale.setTickLabelFormatter(new DecimalFormat ("####"));

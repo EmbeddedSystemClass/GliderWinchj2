@@ -58,65 +58,83 @@ public class Canmsg2 {
     param   : int m: Number of bytes in array to use in computation
     return  : computed checksum 
     ************************************************************************ */
-      private byte checksum(int m){
-          /* Convert pairs of ascii/hex chars to a binary byte */
-          int chktot = 0xa5a5;    // Initial value for computing checksum
-          for (int i = 0; i < m; i ++){ 
-              chktot += (pb[i] & 0xff);  // Build total (int) from byte array
-      }
-           /* Add in carries and carry from adding carries */
-          chktot += (chktot >> 16); // Add carries from low half word
-          chktot += (chktot >> 16); // Add carry from above addition
-          chktot += (chktot >> 8);  // Add carries from low byte
-          chktot += (chktot >> 8);  // Add carry from above addition  
-          return (byte)chktot;
-      }    
-      /** *********************************************************************
-    * Check message for errors and Convert incoming ascii/hex CAN msg to an array of bytes
-    *   plus assemble the bytes comprising CAN ID into an int.
-   
-     * @param msg
-     * msg = String with ascii/hex of a CAN msg
-     * @return  
-     *  * Return: 0 = OK;
-    *        -1 = message too short (less than 14)
-    *        -2 = message too long (greater than 30)
-    *        -3 = number of bytes not even
-    *        -4 = payload count is negative or greater than 8
-    *        -5 = checksum error
-    * *********************************************************************
-     */
-   public int convert_msgtobin (String msg){
-    int m = msg.length();
-    if (m < 14) return -1;  // Too short for a valid CAN msg
-    if (m > 30) return -2;  // Longer than the longest CAN msg
-    if ((m & 0x1) != 0) return -3; // Not even: asci1: hex must be pairs
-    
-    pb = DatatypeConverter.parseHexBinary(msg); // Convert ascii/hex to byte array
-    
-    /* Check computed checksum versus recieved checksum.  */
-    byte chkx = checksum((m/2) - 1);
-    if (chkx != pb[((m/2)-1)]){ 
-        /* System.out is for debugging */
-        System.out.println(msg);
-        for (int j = 0; j < (m/2); j++){
-           System.out.format("%02X ",pb[j]);
+      private byte checksum(int m)
+    {
+        /* Convert pairs of ascii/hex chars to a binary byte */
+        int chktot = 0xa5a5;    // Initial value for computing checksum
+        for (int i = 0; i < m; i++)
+        {
+            chktot += (pb[i] & 0xff);  // Build total (int) from byte array
         }
-        System.out.format("chkx: %02X" + " pb[((m/2) -1)]: %02X\n", chkx, pb[((m/2) -1)] );
-        return -5; // Return error code
-     }
-    
-    /* Check that the payload count is within bounds */
-    if (pb[5] < 0) return -4;    // This should not be possible
-    if (pb[5] > 8) return -4;    // Too large means something wrong.
-       
-    /* Extract some items that are of general use */
-    seq = (pb[0] & 0xff);     // Sequence number
-    dlc = (pb[5] & 0xff);     // Save payload ct in an easy to remember variable
-    id = ((((((pb[4] << 8) | (pb[3] & 0xff)) << 8) | (pb[2] & 0xff)) << 8) | (pb[1] & 0xff));
-   
-    return 0;
-   }
+        /* Add in carries and carry from adding carries */
+        chktot += (chktot >> 16); // Add carries from low half word
+        chktot += (chktot >> 16); // Add carry from above addition
+        chktot += (chktot >> 8);  // Add carries from low byte
+        chktot += (chktot >> 8);  // Add carry from above addition  
+        return (byte) chktot;
+    }
+
+    /**
+     * Check message for errors and Convert incoming ascii/hex CAN msg
+     * to an array of bytes plus assemble the bytes comprising CAN ID 
+     * into an int.
+     *
+     * @param msg msg = String with ascii/hex of a CAN msg
+     * @return * Return: 
+     *  0 = OK; 
+     * -1 = message too short (less than 14) 
+     * -2 = message too long (greater than 30) 
+     * -3 = number of bytes not even 
+     * -4 = payload count is negative or greater than 8 -5 = checksum error
+     */
+    public int convert_msgtobin(String msg)
+    {
+        int m = msg.length();
+        if (m < 14)
+        {
+            return -1;  // Too short for a valid CAN msg
+        }
+        if (m > 30)
+        {
+            return -2;  // Longer than the longest CAN msg
+        }
+        if ((m & 0x1) != 0)
+        {
+            return -3; // Not even: asci1-hex must be in pairs
+        }
+        pb = DatatypeConverter.parseHexBinary(msg); // Convert ascii/hex to byte 
+        // array
+
+        /* Check computed checksum versus recieved checksum.  */
+        byte chkx = checksum((m / 2) - 1);
+        if (chkx != pb[((m / 2) - 1)])
+        {
+            System.out.println(msg);    // Display for debugging
+            for (int j = 0; j < (m / 2); j++)
+            {
+                System.out.format("%02X ", pb[j]);
+            }
+            System.out.format("chkx: %02X" + " pb[((m/2) -1)]: %02X\n", chkx,
+                    pb[((m / 2) - 1)]);
+            return -5; // Return error code
+        }
+
+        /* Check that the payload count is within bounds */
+        if (pb[5] < 0)
+        {
+            return -4;    // This should not be possible
+        }
+        if (pb[5] > 8)
+        {
+            return -4;    // Too large means something wrong.
+        }
+        /* Extract some items that are of general use */
+        seq = (pb[0] & 0xff);     // Sequence number byte->unsigned
+        dlc = (pb[5] & 0xff);     // Save payload ct in an easy to remember variable
+        id = ((((((pb[4] << 8) | (pb[3] & 0xff)) << 8)
+                | (pb[2] & 0xff)) << 8) | (pb[1] & 0xff));
+        return 0;
+    }
    /**
     * Combine four payload bytes to an Integer,
     * @param 
@@ -143,11 +161,25 @@ public class Canmsg2 {
     * Combine payload bytes [0]-[7] to one long 
     */
    public long get_1long(){
-       if (pb[5] != 8){ val = -1; return 0;}
-        int p0  = (((((((pb[ 9] & 0xff) << 8) | (pb[ 8] & 0xff)) << 8) | (pb[ 7] & 0xff)) << 8) | (pb[ 6] & 0xff));
-        int p1 = (((((((pb[13] & 0xff) << 8) | (pb[12] & 0xff)) << 8) | (pb[11] & 0xff)) << 8) | (pb[10] & 0xff));
-        long pl = ( ((long)p1 << 32) | (p0 & 0xffffffffL) ); // Combine to make a long
-       return pl;
+{
+        if (pb[5] != 8)
+        {
+            val = -1;   // insufficient payload length
+            return 0;
+        } else
+        {
+            int x0 = (((((
+                  (pb[ 9] <<          8) | (pb[ 8] & 0xff)) << 8) 
+                | (pb[ 7] & 0xff)) << 8) | (pb[ 6] & 0xff));
+            int x1 = (((((
+                  (pb[13] <<          8) | (pb[12] & 0xff)) << 8)
+                | (pb[11] & 0xff)) << 8) | (pb[10] & 0xff));
+            // Combine to make a long
+            long lng = ((long)x1 << 32) | (x0 & 0xffffffffL);
+            val = 0;
+            return lng;
+        }
+    }
    }
    /**
     * 

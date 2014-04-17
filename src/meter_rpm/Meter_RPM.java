@@ -24,8 +24,7 @@ public class Meter_RPM {
      * @throws java.io.IOException
      */
     public static void main(String[] args) throws IOException {
-       final Stackoverflow so;
-                so = new Stackoverflow(25, "ENGINE RPM");
+                
           String ip;
         ip = "127.0.0.1";   // Default ip address
         //String ip = new String("10.1.1.80");
@@ -44,6 +43,10 @@ public class Meter_RPM {
           BufferedReader in = 
             new BufferedReader(
                 new InputStreamReader(socket.getInputStream()));
+          
+          final Stackoverflow so;
+                so = new Stackoverflow(25, "ENGINE RPM & MANIFOLD PRESSURE");
+          
           Canmsg2 can1; 
             can1 = new Canmsg2();    // Received CAN message
             int ret;
@@ -65,7 +68,7 @@ public class Meter_RPM {
             
             /* Scale readings for display purposes. */
             final double scaled0 = eng[1] * .1; // RPM
-            final double scaled1 = ((double)(eng[0]) / 103.88) - 0.1; // Inches of mercury
+            final double scaled1 = ((double)(eng[0]) / 103.88) - 0.5; // Inches of mercury
           
             SwingUtilities.invokeLater(new Runnable() {
                 @Override
