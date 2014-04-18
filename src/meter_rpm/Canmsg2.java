@@ -102,8 +102,12 @@ public class Canmsg2 {
         {
             return -3; // Not even: asci1-hex must be in pairs
         }
-        pb = DatatypeConverter.parseHexBinary(msg); // Convert ascii/hex to byte 
-        // array
+        try{
+            pb = DatatypeConverter.parseHexBinary(msg); // Convert ascii/hex to byte array
+        }
+        catch(IllegalArgumentException e){
+            System.err.println("Caught IOException: " + e.getMessage());
+        }
 
         /* Check computed checksum versus recieved checksum.  */
         byte chkx = checksum((m / 2) - 1);
