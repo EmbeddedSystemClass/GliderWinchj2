@@ -85,7 +85,9 @@ public class Canmsg2 {
      * -1 = message too short (less than 14) 
      * -2 = message too long (greater than 30) 
      * -3 = number of bytes not even 
-     * -4 = payload count is negative or greater than 8 -5 = checksum error
+     * -4 = payload count is negative or greater than 8 
+     * -5 = checksum error
+     * -6 = non-ascii/hex char in input
      */
     public int convert_msgtobin(String msg)
     {
@@ -107,6 +109,7 @@ public class Canmsg2 {
         }
         catch(IllegalArgumentException e){
             System.err.println("Caught IOException: " + e.getMessage());
+            return -6;
         }
 
         /* Check computed checksum versus recieved checksum.  */
